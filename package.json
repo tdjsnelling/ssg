@@ -6,6 +6,7 @@
   "license": "MIT",
   "dependencies": {
     "chalk": "^3.0.0",
+    "node-sass": "^4.13.1",
     "remark": "^11.0.2",
     "remark-html": "^11.0.1",
     "remark-preset-lint-recommended": "^3.0.4",

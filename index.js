@@ -3,6 +3,7 @@ const path = require('path')
 const http = require('http')
 const handler = require('serve-handler')
 const chalk = require('chalk')
+var sass = require('node-sass')
 
 const remark = require('remark')
 const recommended = require('remark-preset-lint-recommended')
@@ -106,7 +107,15 @@ markdownFiles.map(file => {
 
     if (parsedOpts.style) {
       const stylePath = path.resolve(dir, parsedOpts.style)
-      const style = fs.readFileSync(stylePath, 'utf-8')
+      let style = fs.readFileSync(stylePath, 'utf-8')
+
+      if (stylePath.endsWith('.sass') || stylePath.endsWith('.scss')) {
+        sass.render({ data: style }, (err, result) => {
+          if (err) throw err
+          style = result
+        })
+      }
+
       html = html.replace('%%STYLE%%', style)
       console.log(`${chalk.yellow('  imported styles:')} ${parsedOpts.style}`)
     } else {
