@@ -52,7 +52,12 @@ const getFiles = directory => {
 const allFiles = getFiles(baseDir)
 const markdownFiles = allFiles.filter(x => x && x.endsWith('.md'))
 const assets = allFiles.filter(
-  x => x && !x.endsWith('.md') && !x.endsWith('.css')
+  x =>
+    x &&
+    !x.endsWith('.md') &&
+    !x.endsWith('.css') &&
+    !x.endsWith('.scss') &&
+    !x.endsWith('.sass')
 )
 
 markdownFiles.map(file => {
