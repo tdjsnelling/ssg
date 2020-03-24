@@ -1,5 +1,7 @@
 const fs = require('fs')
 const path = require('path')
+const http = require('http')
+const handler = require('serve-handler')
 const chalk = require('chalk')
 
 const remark = require('remark')
@@ -11,6 +13,7 @@ const converter = remark().use(recommended).use(html)
 const baseHtml = `<html>
   <head>
     <title>%%TITLE%%</title>
+    <style>%%STYLE%%</style>
   </head>
   <body>
     %%CONTENT%%
@@ -100,3 +103,15 @@ markdownFiles.map(file => {
 console.log(
   `${chalk.green('🚀 done!')} generated ${generatedFiles} static files`
 )
+
+const server = http.createServer((request, response) => {
+  return handler(request, response, {
+    public: path.resolve(baseDir, 'out'),
+  })
+})
+
+server.listen(3000, () => {
+  console.log(
+    `${chalk.green('📄 done!')} server running at http://localhost:3000`
+  )
+})
