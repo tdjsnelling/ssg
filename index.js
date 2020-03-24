@@ -20,7 +20,9 @@ const baseHtml = `<html>
   </body>
 </html>`
 
+const startTime = +Date.now()
 let generatedFiles = 0
+let copiedAssets = 0
 
 const baseDir =
   process.env.NODE_ENV !== 'production'
@@ -33,17 +35,24 @@ if (!fs.existsSync(path.resolve(baseDir, 'out'))) {
   fs.mkdirSync(path.resolve(baseDir, 'out'))
 }
 
-const getMarkdownFiles = directory => {
+const getFiles = directory => {
   const files = fs.readdirSync(directory)
   const resolved = files.map(file => {
     const res = path.resolve(directory, file)
-    return fs.statSync(res).isDirectory() ? getMarkdownFiles(res) : res
+    return fs.statSync(res).isDirectory()
+      ? res.endsWith('/out')
+        ? null
+        : getFiles(res)
+      : res
   })
-  const allFiles = resolved.reduce((a, f) => a.concat(f), [])
-  return allFiles.filter(x => x.endsWith('.md'))
+  return resolved.reduce((a, f) => a.concat(f), [])
 }
 
-const markdownFiles = getMarkdownFiles(baseDir)
+const allFiles = getFiles(baseDir)
+const markdownFiles = allFiles.filter(x => x && x.endsWith('.md'))
+const assets = allFiles.filter(
+  x => x && !x.endsWith('.md') && !x.endsWith('.css')
+)
 
 markdownFiles.map(file => {
   console.log(`${chalk.cyan('processing:')} ${file}`)
@@ -111,8 +120,32 @@ markdownFiles.map(file => {
   })
 })
 
+assets.map(file => {
+  console.log(`${chalk.cyan('processing:')} ${file}`)
+
+  let dir = file.split('/')
+  const filename = dir.pop()
+  dir = dir.join('/')
+
+  const outDir = dir.replace(baseDir, baseDir + '/out')
+
+  if (!fs.existsSync(outDir)) {
+    fs.mkdirSync(outDir)
+    console.log(`${chalk.yellow('  created directory:')} ${outDir}`)
+  }
+
+  fs.copyFileSync(file, path.resolve(outDir, filename))
+  console.log(`${chalk.yellow('  copied asset:')} ${file}`)
+
+  copiedAssets += 1
+})
+
+console.log(`${chalk.green('done!')} generated ${generatedFiles} static files`)
+console.log(`${chalk.green('done!')} copied ${copiedAssets} static assets`)
 console.log(
-  `${chalk.green('🚀 done!')} generated ${generatedFiles} static files`
+  `${chalk.green('done!')} in ${((+Date.now() - startTime) / 1000).toFixed(
+    2
+  )} seconds`
 )
 
 const server = http.createServer((request, response) => {
@@ -122,7 +155,5 @@ const server = http.createServer((request, response) => {
 })
 
 server.listen(3000, () => {
-  console.log(
-    `${chalk.green('📄 done!')} server running at http://localhost:3000`
-  )
+  console.log(`${chalk.green('done!')} server running at http://localhost:3000`)
 })
