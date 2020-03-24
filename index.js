@@ -70,11 +70,12 @@ markdownFiles.map(file => {
   let dir = filename.split('/')
   dir.pop()
   dir = dir.join('/')
-  dir = dir.replace(baseDir, baseDir + '/out')
 
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir)
-    console.log(`${chalk.yellow('  created directory:')} ${dir}`)
+  const outDir = dir.replace(baseDir, baseDir + '/out')
+
+  if (!fs.existsSync(outDir)) {
+    fs.mkdirSync(outDir)
+    console.log(`${chalk.yellow('  created directory:')} ${outDir}`)
   }
 
   converter.process(md, (err, htmlFile) => {
@@ -86,12 +87,22 @@ markdownFiles.map(file => {
     console.log(chalk.yellow('  converted markdown -> html'))
 
     let html = baseHtml
+
     if (parsedOpts.title) {
       html = html.replace('%%TITLE%%', parsedOpts.title)
     } else {
       html = html.replace('<title>%%TITLE%%</title>', '')
     }
     html = html.replace('%%CONTENT%%', String(htmlFile))
+
+    if (parsedOpts.style) {
+      const stylePath = path.resolve(dir, parsedOpts.style)
+      const style = fs.readFileSync(stylePath, 'utf-8')
+      html = html.replace('%%STYLE%%', style)
+      console.log(`${chalk.yellow('  imported styles:')} ${parsedOpts.style}`)
+    } else {
+      html = html.replace('<style>%%STYLE%%</style>', '')
+    }
 
     fs.writeFileSync(filename.replace(baseDir, baseDir + '/out'), html)
     console.log(chalk.yellow('  wrote html file'))
