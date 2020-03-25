@@ -11,6 +11,9 @@ const open = require('open')
 const remark = require('remark')
 const recommended = require('remark-preset-lint-recommended')
 const html = require('remark-html')
+const highlight = require('remark-highlight.js')
+const math = require('remark-math')
+const htmlKatex = require('remark-html-katex')
 
 const pkg = require('./package.json')
 
@@ -38,12 +41,19 @@ parser.addArgument('path', {
 
 const args = parser.parseArgs()
 
-const converter = remark().use(recommended).use(html)
+const converter = remark()
+  .use(recommended)
+  .use(highlight)
+  .use(math)
+  .use(htmlKatex)
+  .use(html)
 
 const baseHtml = `<html>
   <head>
     <title>%%TITLE%%</title>
     <style>%%STYLE%%</style>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.css" integrity="sha384-zB1R0rpPzHqg7Kpt0Aljp8JPLqbXI3bhnPWROx27a9N0Ll6ZP/+DiW/UqRcLbRjq" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.1/build/styles/atom-one-dark.min.css">
   </head>
   <body>
     %%CONTENT%%
