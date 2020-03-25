@@ -8,7 +8,6 @@
     "argparse": "^1.0.10",
     "chalk": "^3.0.0",
     "node-sass": "^4.13.1",
-    "open": "^7.0.3",
     "remark": "^11.0.2",
     "remark-highlight.js": "^6.0.0",
     "remark-html": "^11.0.1",

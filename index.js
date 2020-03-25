@@ -6,7 +6,6 @@ const chalk = require('chalk')
 const sass = require('node-sass')
 const prettier = require('prettier')
 const argparse = require('argparse').ArgumentParser
-const open = require('open')
 
 const remark = require('remark')
 const recommended = require('remark-preset-lint-recommended')
@@ -250,6 +249,5 @@ if (args.serve) {
         args.port || 3000
       }`
     )
-    open(`http://localhost:${args.port || 3000}`)
   })
 }
