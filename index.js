@@ -5,6 +5,7 @@ const handler = require('serve-handler')
 const chalk = require('chalk')
 const sass = require('node-sass')
 const argparse = require('argparse').ArgumentParser
+const open = require('open')
 
 const remark = require('remark')
 const recommended = require('remark-preset-lint-recommended')
@@ -182,6 +183,7 @@ assets.map(file => {
 
 console.log(`${chalk.green('done!')} generated ${generatedFiles} static files`)
 console.log(`${chalk.green('done!')} copied ${copiedAssets} static assets`)
+console.log(`${chalk.green('done!')} site generated in ${baseDir + '/out'}`)
 console.log(
   `${chalk.green('done!')} in ${((+Date.now() - startTime) / 1000).toFixed(
     2
@@ -201,5 +203,6 @@ if (args.serve) {
         args.port || 3000
       }`
     )
+    open(`http://localhost:${args.port || 3000}`)
   })
 }
