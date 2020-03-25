@@ -6,6 +6,7 @@ const chalk = require('chalk')
 const sass = require('node-sass')
 const prettier = require('prettier')
 const argparse = require('argparse').ArgumentParser
+const chokidar = require('chokidar')
 
 const remark = require('remark')
 const recommended = require('remark-preset-lint-recommended')
@@ -40,8 +41,6 @@ parser.addArgument('path', {
 
 const args = parser.parseArgs()
 
-let converter = remark().use(recommended).use(html)
-
 const baseHtml = `<html>
   <head>
     %%HEAD%%
@@ -50,8 +49,6 @@ const baseHtml = `<html>
     %%CONTENT%%
   </body>
 </html>`
-
-const head = []
 
 const startTime = +Date.now()
 let generatedFiles = 0
@@ -91,7 +88,9 @@ const assets = allFiles.filter(
     !x.endsWith('.sass')
 )
 
-markdownFiles.map(file => {
+const buildHtml = file => {
+  let converter = remark().use(recommended).use(html)
+
   console.log(`${chalk.cyan('processing:')} ${file}`)
   let md = fs.readFileSync(file, 'utf-8')
 
@@ -131,6 +130,8 @@ markdownFiles.map(file => {
   if (parsedOpts.code) {
     converter = converter.use(highlight)
   }
+
+  const head = []
 
   converter.process(md, (err, htmlFile) => {
     if (err) {
@@ -205,9 +206,9 @@ markdownFiles.map(file => {
 
     generatedFiles += 1
   })
-})
+}
 
-assets.map(file => {
+const copyAsset = file => {
   console.log(`${chalk.cyan('processing:')} ${file}`)
 
   let dir = file.split('/')
@@ -225,6 +226,14 @@ assets.map(file => {
   console.log(`${chalk.yellow('  copied asset:')} ${file}`)
 
   copiedAssets += 1
+}
+
+markdownFiles.map(file => {
+  buildHtml(file)
+})
+
+assets.map(file => {
+  copyAsset(file)
 })
 
 console.log(`${chalk.green('done!')} generated ${generatedFiles} static files`)
@@ -250,4 +259,25 @@ if (args.serve) {
       }`
     )
   })
+
+  chokidar
+    .watch(baseDir, {
+      ignored: path.resolve(baseDir, 'out'),
+    })
+    .on('change', path => {
+      console.log(`${chalk.cyan('---\ndetected change:')} ${path}`)
+      if (path.endsWith('.md')) {
+        buildHtml(path)
+      } else {
+        if (
+          !path.endsWith('.css') &&
+          !path.endsWith('.scss') &&
+          !path.endsWith('.sass')
+        ) {
+          copyAsset(path)
+        }
+      }
+    })
+
+  console.log(`${chalk.green('done!')} watching for file changes`)
 }
