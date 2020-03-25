@@ -79,14 +79,7 @@ const getFiles = directory => {
 
 const allFiles = getFiles(baseDir)
 const markdownFiles = allFiles.filter(x => x && x.endsWith('.md'))
-const assets = allFiles.filter(
-  x =>
-    x &&
-    !x.endsWith('.md') &&
-    !x.endsWith('.css') &&
-    !x.endsWith('.scss') &&
-    !x.endsWith('.sass')
-)
+const assets = allFiles.filter(x => x && !x.endsWith('.md'))
 
 const buildHtml = file => {
   let converter = remark().use(recommended).use(html)
@@ -146,31 +139,12 @@ const buildHtml = file => {
     }
 
     if (parsedOpts.style) {
-      const stylePath = path.resolve(dir, parsedOpts.style)
-      let style = fs.readFileSync(stylePath, 'utf-8')
-
-      if (stylePath.endsWith('.sass') || stylePath.endsWith('.scss')) {
-        let result
-        try {
-          result = sass.renderSync({ data: style })
-        } catch (e) {
-          console.error(
-            `${chalk.red('  error:')} transpiling styles ${
-              parsedOpts.style
-            } (line ${e.line})`
-          )
-          console.error(`${chalk.red('  error:')} ${e.message}`)
-          throw e.formatted
-        }
-        if (result.css) {
-          style = String(result.css)
-          console.log(
-            `${chalk.yellow('  transpiled styles:')} ${parsedOpts.style}`
-          )
-        }
-      }
-
-      head.push(`<style>${style}</style>`)
+      head.push(
+        `<link rel="stylesheet" href="${parsedOpts.style.replace(
+          /.s(a|c)ss/gm,
+          '.css'
+        )}">`
+      )
       console.log(`${chalk.yellow('  imported styles:')} ${parsedOpts.style}`)
     }
 
@@ -222,8 +196,35 @@ const copyAsset = file => {
     console.log(`${chalk.yellow('  created directory:')} ${outDir}`)
   }
 
-  fs.copyFileSync(file, path.resolve(outDir, filename))
-  console.log(`${chalk.yellow('  copied asset:')} ${file}`)
+  if (!file.endsWith('.sass') && !file.endsWith('.scss')) {
+    fs.copyFileSync(file, path.resolve(outDir, filename))
+    console.log(`${chalk.yellow('  copied asset:')} ${file}`)
+  } else {
+    let style = fs.readFileSync(file, 'utf-8')
+    let result
+    try {
+      result = sass.renderSync({ data: style })
+    } catch (e) {
+      console.error(
+        `${chalk.red('  error:')} transpiling styles ${file} (line ${e.line})`
+      )
+      console.error(`${chalk.red('  error:')} ${e.message}`)
+      throw e.formatted
+    }
+    if (result.css) {
+      console.log(`${chalk.yellow('  transpiled styles:')} ${file}`)
+      fs.writeFileSync(
+        file.replace(baseDir, baseDir + '/out').replace(/.s(a|c)ss/gm, '.css'),
+        prettier.format(String(result.css), { parser: 'css' })
+      )
+      console.log(
+        `${chalk.yellow('  copied asset:')} ${file.replace(
+          /.s(a|c)ss/gm,
+          '.css'
+        )}`
+      )
+    }
+  }
 
   copiedAssets += 1
 }
@@ -269,13 +270,7 @@ if (args.serve) {
       if (path.endsWith('.md')) {
         buildHtml(path)
       } else {
-        if (
-          !path.endsWith('.css') &&
-          !path.endsWith('.scss') &&
-          !path.endsWith('.sass')
-        ) {
-          copyAsset(path)
-        }
+        copyAsset(path)
       }
     })
 
