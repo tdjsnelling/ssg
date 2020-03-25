@@ -41,12 +41,7 @@ parser.addArgument('path', {
 
 const args = parser.parseArgs()
 
-const converter = remark()
-  .use(recommended)
-  .use(highlight)
-  .use(math)
-  .use(htmlKatex)
-  .use(html)
+let converter = remark().use(recommended).use(html)
 
 const baseHtml = `<html>
   <head>
@@ -130,6 +125,14 @@ markdownFiles.map(file => {
     console.log(`${chalk.yellow('  created directory:')} ${outDir}`)
   }
 
+  if (parsedOpts.math === 'yes') {
+    converter = converter.use(math).use(htmlKatex)
+  }
+
+  if (parsedOpts.code) {
+    converter = converter.use(highlight)
+  }
+
   converter.process(md, (err, htmlFile) => {
     if (err) {
       console.error(`${chalk.red('  error:')} converting markdown -> html`)
@@ -186,7 +189,7 @@ markdownFiles.map(file => {
       )
       console.log(
         `${chalk.yellow('  including syntax highlighting:')} ${
-          parsedOpts.highlight
+          parsedOpts.highlight || 'default'
         }`
       )
     }
