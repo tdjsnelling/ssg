@@ -50,15 +50,14 @@ const converter = remark()
 
 const baseHtml = `<html>
   <head>
-    <title>%%TITLE%%</title>
-    <style>%%STYLE%%</style>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.css" integrity="sha384-zB1R0rpPzHqg7Kpt0Aljp8JPLqbXI3bhnPWROx27a9N0Ll6ZP/+DiW/UqRcLbRjq" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.1/build/styles/atom-one-dark.min.css">
+    %%HEAD%%
   </head>
   <body>
     %%CONTENT%%
   </body>
 </html>`
+
+const head = []
 
 const startTime = +Date.now()
 let generatedFiles = 0
@@ -139,14 +138,9 @@ markdownFiles.map(file => {
 
     console.log(chalk.yellow('  converted markdown -> html'))
 
-    let html = baseHtml
-
     if (parsedOpts.title) {
-      html = html.replace('%%TITLE%%', parsedOpts.title)
-    } else {
-      html = html.replace('<title>%%TITLE%%</title>', '')
+      head.push(`<title>${parsedOpts.title}</title>`)
     }
-    html = html.replace('%%CONTENT%%', String(htmlFile))
 
     if (parsedOpts.style) {
       const stylePath = path.resolve(dir, parsedOpts.style)
@@ -173,11 +167,33 @@ markdownFiles.map(file => {
         }
       }
 
-      html = html.replace('%%STYLE%%', style)
+      head.push(`<style>${style}</style>`)
       console.log(`${chalk.yellow('  imported styles:')} ${parsedOpts.style}`)
-    } else {
-      html = html.replace('<style>%%STYLE%%</style>', '')
     }
+
+    if (parsedOpts.math === 'yes') {
+      head.push(
+        '<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.css" integrity="sha384-zB1R0rpPzHqg7Kpt0Aljp8JPLqbXI3bhnPWROx27a9N0Ll6ZP/+DiW/UqRcLbRjq" crossorigin="anonymous">'
+      )
+      console.log(chalk.yellow('  including math support'))
+    }
+
+    if (parsedOpts.code === 'yes') {
+      head.push(
+        `<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.1/build/styles/${
+          parsedOpts.highlight || 'default'
+        }.min.css">`
+      )
+      console.log(
+        `${chalk.yellow('  including syntax highlighting:')} ${
+          parsedOpts.highlight
+        }`
+      )
+    }
+
+    let html = baseHtml
+    html = html.replace('%%HEAD%%', head.join('\n'))
+    html = html.replace('%%CONTENT%%', String(htmlFile))
 
     fs.writeFileSync(
       filename.replace(baseDir, baseDir + '/out'),
