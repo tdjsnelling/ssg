@@ -3,13 +3,38 @@ const path = require('path')
 const http = require('http')
 const handler = require('serve-handler')
 const chalk = require('chalk')
-var sass = require('node-sass')
+const sass = require('node-sass')
+const argparse = require('argparse').ArgumentParser
 
 const remark = require('remark')
 const recommended = require('remark-preset-lint-recommended')
 const html = require('remark-html')
 
-const package = require('./package.json')
+const pkg = require('./package.json')
+
+const parser = new argparse({
+  version: pkg.version,
+  addHelp: true,
+})
+
+parser.addArgument(['-s', '--serve'], {
+  default: false,
+  action: 'storeTrue',
+  help: 'Serve the site after building',
+})
+
+parser.addArgument(['-p', '--port'], {
+  defaultValue: 3000,
+  help: 'Port to run the web server on. Default 3000',
+})
+
+parser.addArgument('path', {
+  metavar: 'PATH',
+  type: String,
+  help: 'Path of the directory to be built',
+})
+
+const args = parser.parseArgs()
 
 const converter = remark().use(recommended).use(html)
 
@@ -27,12 +52,9 @@ const startTime = +Date.now()
 let generatedFiles = 0
 let copiedAssets = 0
 
-console.log(`${chalk.green('tdjsnelling/ssg')} v${package.version}`)
+console.log(`${chalk.green('tdjsnelling/ssg')} v${pkg.version}`)
 
-const baseDir =
-  process.env.NODE_ENV !== 'production'
-    ? path.resolve(process.argv[2])
-    : path.resolve(process.argv[1])
+const baseDir = path.resolve(args.path)
 
 console.log(`${chalk.cyan('base directory:')} ${baseDir}`)
 
@@ -166,12 +188,18 @@ console.log(
   )} seconds`
 )
 
-const server = http.createServer((request, response) => {
-  return handler(request, response, {
-    public: path.resolve(baseDir, 'out'),
+if (args.serve) {
+  const server = http.createServer((request, response) => {
+    return handler(request, response, {
+      public: path.resolve(baseDir, 'out'),
+    })
   })
-})
 
-server.listen(3000, () => {
-  console.log(`${chalk.green('done!')} server running at http://localhost:3000`)
-})
+  server.listen(args.port || 3000, () => {
+    console.log(
+      `${chalk.green('done!')} server running at http://localhost:${
+        args.port || 3000
+      }`
+    )
+  })
+}

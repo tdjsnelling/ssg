@@ -5,6 +5,7 @@
   "author": "Tom Snelling",
   "license": "MIT",
   "dependencies": {
+    "argparse": "^1.0.10",
     "chalk": "^3.0.0",
     "node-sass": "^4.13.1",
     "remark": "^11.0.2",
