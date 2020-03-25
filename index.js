@@ -4,6 +4,7 @@ const http = require('http')
 const handler = require('serve-handler')
 const chalk = require('chalk')
 const sass = require('node-sass')
+const prettier = require('prettier')
 const argparse = require('argparse').ArgumentParser
 const open = require('open')
 
@@ -142,10 +143,24 @@ markdownFiles.map(file => {
       let style = fs.readFileSync(stylePath, 'utf-8')
 
       if (stylePath.endsWith('.sass') || stylePath.endsWith('.scss')) {
-        sass.render({ data: style }, (err, result) => {
-          if (err) throw err
-          style = result
-        })
+        let result
+        try {
+          result = sass.renderSync({ data: style })
+        } catch (e) {
+          console.error(
+            `${chalk.red('  error:')} transpiling styles ${
+              parsedOpts.style
+            } (line ${e.line})`
+          )
+          console.error(`${chalk.red('  error:')} ${e.message}`)
+          throw e.formatted
+        }
+        if (result.css) {
+          style = String(result.css)
+          console.log(
+            `${chalk.yellow('  transpiled styles:')} ${parsedOpts.style}`
+          )
+        }
       }
 
       html = html.replace('%%STYLE%%', style)
@@ -154,7 +169,10 @@ markdownFiles.map(file => {
       html = html.replace('<style>%%STYLE%%</style>', '')
     }
 
-    fs.writeFileSync(filename.replace(baseDir, baseDir + '/out'), html)
+    fs.writeFileSync(
+      filename.replace(baseDir, baseDir + '/out'),
+      prettier.format(html, { parser: 'html' })
+    )
     console.log(chalk.yellow('  wrote html file'))
 
     generatedFiles += 1
