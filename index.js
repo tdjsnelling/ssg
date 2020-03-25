@@ -9,6 +9,8 @@ const remark = require('remark')
 const recommended = require('remark-preset-lint-recommended')
 const html = require('remark-html')
 
+const package = require('./package.json')
+
 const converter = remark().use(recommended).use(html)
 
 const baseHtml = `<html>
@@ -24,6 +26,8 @@ const baseHtml = `<html>
 const startTime = +Date.now()
 let generatedFiles = 0
 let copiedAssets = 0
+
+console.log(`${chalk.green('tdjsnelling/ssg')} v${package.version}`)
 
 const baseDir =
   process.env.NODE_ENV !== 'production'
