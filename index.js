@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 const fs = require('fs')
 const path = require('path')
 const http = require('http')
@@ -100,7 +102,9 @@ const buildHtml = file => {
     console.log(
       `${chalk.yellow('  parsed options:')} ${JSON.stringify(parsedOpts)}`
     )
-    md = md.split('%%\n')[2]
+    md = md.split('%%\n')
+    md.splice(0, 2)
+    md = md.join('')
   }
 
   const filename = file.replace('.md', '.html')
