@@ -1,9 +1,24 @@
 {
-  "name": "ssg",
+  "name": "@tdjsnelling/ssg",
   "version": "1.0.0",
   "main": "index.js",
   "author": "Tom Snelling",
+  "description": "ssg is a tiny Markdown → HTML static site generator.",
   "license": "MIT",
+  "bin": {
+    "ssg": "./index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tdjsnelling/ssg.git"
+  },
+  "keywords": [
+    "static",
+    "site",
+    "generator",
+    "markdown",
+    "ssg"
+  ],
   "dependencies": {
     "argparse": "^1.0.10",
     "chalk": "^3.0.0",
