@@ -48,4 +48,4 @@ The existing options are as follows:
 
 ## Example
 
-This README is built in the [example](./example) folder.
+This README is built in the [example](./example) folder. See the built page [here](https://tdjsnelling.github.io/ssg/example/build/index.html).
