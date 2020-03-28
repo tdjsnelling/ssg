@@ -62,8 +62,8 @@ const baseDir = path.resolve(args.path)
 
 console.log(`${chalk.cyan('base directory:')} ${baseDir}`)
 
-if (!fs.existsSync(path.resolve(baseDir, 'out'))) {
-  fs.mkdirSync(path.resolve(baseDir, 'out'))
+if (!fs.existsSync(path.resolve(baseDir, 'build'))) {
+  fs.mkdirSync(path.resolve(baseDir, 'build'))
 }
 
 const getFiles = directory => {
@@ -71,7 +71,7 @@ const getFiles = directory => {
   const resolved = files.map(file => {
     const res = path.resolve(directory, file)
     return fs.statSync(res).isDirectory()
-      ? res.endsWith('/out')
+      ? res.endsWith('/build')
         ? null
         : getFiles(res)
       : res
@@ -113,11 +113,11 @@ const buildHtml = file => {
   dir.pop()
   dir = dir.join('/')
 
-  const outDir = dir.replace(baseDir, baseDir + '/out')
+  const buildDir = dir.replace(baseDir, baseDir + '/build')
 
-  if (!fs.existsSync(outDir)) {
-    fs.mkdirSync(outDir)
-    console.log(`${chalk.yellow('  created directory:')} ${outDir}`)
+  if (!fs.existsSync(buildDir)) {
+    fs.mkdirSync(buildDir)
+    console.log(`${chalk.yellow('  created directory:')} ${buildDir}`)
   }
 
   if (parsedOpts.math === 'yes') {
@@ -177,7 +177,7 @@ const buildHtml = file => {
     html = html.replace('%%CONTENT%%', String(htmlFile))
 
     fs.writeFileSync(
-      filename.replace(baseDir, baseDir + '/out'),
+      filename.replace(baseDir, baseDir + '/build'),
       prettier.format(html, { parser: 'html' })
     )
     console.log(chalk.yellow('  wrote html file'))
@@ -193,15 +193,15 @@ const copyAsset = file => {
   const filename = dir.pop()
   dir = dir.join('/')
 
-  const outDir = dir.replace(baseDir, baseDir + '/out')
+  const buildDir = dir.replace(baseDir, baseDir + '/build')
 
-  if (!fs.existsSync(outDir)) {
-    fs.mkdirSync(outDir)
-    console.log(`${chalk.yellow('  created directory:')} ${outDir}`)
+  if (!fs.existsSync(buildDir)) {
+    fs.mkdirSync(buildDir)
+    console.log(`${chalk.yellow('  created directory:')} ${buildDir}`)
   }
 
   if (!file.endsWith('.sass') && !file.endsWith('.scss')) {
-    fs.copyFileSync(file, path.resolve(outDir, filename))
+    fs.copyFileSync(file, path.resolve(buildDir, filename))
     console.log(`${chalk.yellow('  copied asset:')} ${file}`)
   } else {
     let style = fs.readFileSync(file, 'utf-8')
@@ -218,7 +218,9 @@ const copyAsset = file => {
     if (result.css) {
       console.log(`${chalk.yellow('  transpiled styles:')} ${file}`)
       fs.writeFileSync(
-        file.replace(baseDir, baseDir + '/out').replace(/.s(a|c)ss/gm, '.css'),
+        file
+          .replace(baseDir, baseDir + '/build')
+          .replace(/.s(a|c)ss/gm, '.css'),
         prettier.format(String(result.css), { parser: 'css' })
       )
       console.log(
@@ -243,7 +245,7 @@ assets.map(file => {
 
 console.log(`${chalk.green('done!')} generated ${generatedFiles} static files`)
 console.log(`${chalk.green('done!')} copied ${copiedAssets} static assets`)
-console.log(`${chalk.green('done!')} site generated in ${baseDir + '/out'}`)
+console.log(`${chalk.green('done!')} site generated in ${baseDir + '/build'}`)
 console.log(
   `${chalk.green('done!')} in ${((+Date.now() - startTime) / 1000).toFixed(
     2
@@ -253,7 +255,7 @@ console.log(
 if (args.serve) {
   const server = http.createServer((request, response) => {
     return handler(request, response, {
-      public: path.resolve(baseDir, 'out'),
+      public: path.resolve(baseDir, 'build'),
     })
   })
 
@@ -267,7 +269,7 @@ if (args.serve) {
 
   chokidar
     .watch(baseDir, {
-      ignored: path.resolve(baseDir, 'out'),
+      ignored: path.resolve(baseDir, 'build'),
     })
     .on('change', path => {
       console.log(`${chalk.cyan('---\ndetected change:')} ${path}`)

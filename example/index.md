@@ -1,3 +1,11 @@
+%%
+title = tdjsnelling/ssg
+style = index.scss
+math = yes
+code = yes
+highlight = atom-one-light
+%%
+
 # ssg
 
 _ssg_ is a tiny Markdown → HTML static site generator.
@@ -6,13 +14,13 @@ _ssg_ is a tiny Markdown → HTML static site generator.
 
 Install _ssg_ with
 
-```
+```plaintext
 npm i -g @tdjsnelling/ssg
 ```
 
 or
 
-```
+```plaintext
 yarn global add @tdjsnelling/ssg
 ```
 
@@ -20,7 +28,7 @@ yarn global add @tdjsnelling/ssg
 
 _ssg_ only requires a path to the directory you wish to build.
 
-```
+```plaintext
 ssg .
 ```
 
@@ -28,7 +36,7 @@ Markdown files will be compiled to HTML and all other static assets will be copi
 
 Optionally, you can tell _ssg_ to serve the build and watch for changes with the `--serve` or `-s` option. By default the server runs on port 3000, this can be changed with the `--port` or `-p` option.
 
-```
+```plaintext
 ssg . -s -p 5000
 ```
 
@@ -40,7 +48,7 @@ Each markdown file can have an 'options' section before the content, to configur
 
 The existing options are as follows:
 
-- title: the <title> to include in the page head
+- title: the `<title>` to include in the page head
 - style: relative path to a CSS or SASS/SCSS file to include on the page. SASS/SCSS is automatically transpiled
 - math: if `yes`, include KaTeX rendering support on the page
 - code: if `yes`, include syntax highlighting support on the page
@@ -48,4 +56,18 @@ The existing options are as follows:
 
 ## Example
 
-This README is built in the [example](./example) folder.
+A basic markdown file might look like this:
+
+```markdown
+%%
+title = ssg demo
+style = index.css
+code = yes
+%%
+
+# ssg demo
+
+This is a demo file for ssg.
+
+Here is some code to be highlighted:
+```

@@ -1,0 +1,84 @@
+<html>
+  <head>
+    <title>tdjsnelling/ssg</title>
+    <link rel="stylesheet" href="index.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.css"
+      integrity="sha384-zB1R0rpPzHqg7Kpt0Aljp8JPLqbXI3bhnPWROx27a9N0Ll6ZP/+DiW/UqRcLbRjq"
+      crossorigin="anonymous"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.1/build/styles/atom-one-light.min.css"
+    />
+  </head>
+  <body>
+    <h1>ssg</h1>
+    <p><em>ssg</em> is a tiny Markdown → HTML static site generator.</p>
+    <h2>Install</h2>
+    <p>Install <em>ssg</em> with</p>
+    <pre><code class="hljs language-plaintext">npm i -g @tdjsnelling/ssg</code></pre>
+    <p>or</p>
+    <pre><code class="hljs language-plaintext">yarn global add @tdjsnelling/ssg</code></pre>
+    <h2>Usage</h2>
+    <p><em>ssg</em> only requires a path to the directory you wish to build.</p>
+    <pre><code class="hljs language-plaintext">ssg .</code></pre>
+    <p>
+      Markdown files will be compiled to HTML and all other static assets will
+      be copied over to the build directory. HTML is run through
+      <a href="https://prettier.io/">prettier</a> to ensure built files remain
+      human readable and editable.
+    </p>
+    <p>
+      Optionally, you can tell <em>ssg</em> to serve the build and watch for
+      changes with the <code>--serve</code> or <code>-s</code> option. By
+      default the server runs on port 3000, this can be changed with the
+      <code>--port</code> or <code>-p</code> option.
+    </p>
+    <pre><code class="hljs language-plaintext">ssg . -s -p 5000</code></pre>
+    <p>
+      <em>ssg</em> will automatically rebuild files as and when it detects
+      changes.
+    </p>
+    <h2>Options</h2>
+    <p>
+      Each markdown file can have an 'options' section before the content, to
+      configure the build process. This section is enclosed in double-percent
+      symbols, <code>%%</code>.
+    </p>
+    <p>The existing options are as follows:</p>
+    <ul>
+      <li>title: the <code>&#x3C;title></code> to include in the page head</li>
+      <li>
+        style: relative path to a CSS or SASS/SCSS file to include on the page.
+        SASS/SCSS is automatically transpiled
+      </li>
+      <li>
+        math: if <code>yes</code>, include KaTeX rendering support on the page
+      </li>
+      <li>
+        code: if <code>yes</code>, include syntax highlighting support on the
+        page
+      </li>
+      <li>
+        highlight: the syntax highlighting theme to use. should be the name of a
+        <a
+          href="https://github.com/highlightjs/highlight.js/tree/master/src/styles"
+          >highlight.js theme</a
+        >, otherwise <code>default</code> is used
+      </li>
+    </ul>
+    <h2>Example</h2>
+    <p>A basic markdown file might look like this:</p>
+    <pre><code class="hljs language-markdown">title = ssg demo
+style = index.css
+code = yes
+
+<span class="hljs-section"># ssg demo</span>
+
+This is a demo file for ssg.
+
+Here is some code to be highlighted:</code></pre>
+  </body>
+</html>
